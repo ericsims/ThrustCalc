@@ -11,14 +11,13 @@ public class Thrust
     double molesOfGases[] = new double[5];
     double proportionOfGases[] = {88, 68, 23, 2, 1};
     double totalMass; // of gases
-    double RMS[] = new double[5];
-    double rmsAVG;
     
     // Ammonium Nitrate (s) data
     double ANmolarMass = 80.052;
     double gramsOfAN = 10.25;
     double molesOfAN = .13;
     double ANproportion = 34;
+    
     // Environment Data
     double temp = 473; // 200 C (decomposition temperature of AN)
     double atm = 1; // atmospheric pressure at sea level
@@ -54,10 +53,6 @@ public class Thrust
         for(int i = 0; i < 5; i++)
         {
             System.out.print(molarMass[i] + " " + proportionOfGases[i] + " " + molesOfGases[i] + " " + gramsOfGases[i] + "\n");
-        }
-        for(int i = 0; i < 5; i++)
-        {
-            RMS[i] = RMS(molarMass[i]);
         }
         radius = .635;
         length = 14;
@@ -113,44 +108,30 @@ public class Thrust
     public void setExitVelocity() // out: m/s
     {
         double exp = (gamma - 1)/gamma;
-        /*double total = 0;
-        for(int i = 0; i < 5; i++) // gets RMS of each gas.
-        {
-            RMS[i] = RMS(molesOfGases[i]); //out: m/s
-        }
-        for(int i = 0; i < 5; i++)
-        {
-            total += molesOfGases[i]/totalMass * RMS[i];
-        }
-        rmsAVG = total / 5; */
         exitVelocity = Math.sqrt( (temp * 8.314 / (25.3*.001)) * ((2 * gamma) / (gamma - 1)) * (1 - Math.pow( (exitPressure/cPressure), exp) ) );
-        System.out.println("exit^2: " + (temp * 8.314 / (25.3/1000)) * ((2 * gamma) / (gamma - 1)) * (1 - Math.pow( (exitPressure/cPressure), exp) ));
+        System.out.println("\t exit^2: " + (temp * 8.314 / (25.3/1000)) * ((2 * gamma) / (gamma - 1)) * (1 - Math.pow( (exitPressure/cPressure), exp) ));
         System.out.println("\t" + "Temp: " + temp);
         System.out.println("\t exp: " + exp);
         System.out.println("\t" + "Gamma: " + gamma);
     }
-        public double RMS(double mol) // in: g/mol, out: m/s
-        {
-            double rms = Math.sqrt((3 * 8.31446 * temp )/ (mol*.001));
-            return rms;
-        }
     public void setMassFlowRate() // in: kg/L, m/s, cm^2 out: kg/s
     {
         massFlowRate = (density * (exitVelocity/100) * exitArea)/1000;
     }
     public void setThrust() // kg/s * m/s + cm^2 * (atm) to Newtons
     {
-        thrust = massFlowRate * exitVelocity + (exitArea * .0001) * ((exitPressure - atm) * 1.01325 * Math.pow(10,5));
+        thrust = massFlowRate * exitVelocity + (exitArea * .0001) * ((exitPressure - atm) * 1.01325 * Math.pow(10,5)); // converts atm to Pa
     }
     public void printAll()
     {
-        System.out.println("CHEMISTRY IS EASY, ANYONE CAN DO IT!" + "\n" +
-        "Mass Flow Rate, m-dot: " + massFlowRate + "\n" +
-        "Density, rho: " + density + "\n" +
-        "Exit Velocity: " + exitVelocity + "\n" +
-        "Exit Area: " + exitArea + "\n" +
-        "Exit Pressure: " + exitPressure + "\n" +
-        "Atmospheric Pressure: " + atm + "\n" +
+        System.out.println("\n\nCHEMISTRY IS EASY, ANYONE CAN DO IT!" + "\n" +
+        "F(thrust) = m-dot * V(exit) + A(exit) * (P(exit) - P(atmospheric))" + "\n" +
+        "Mass Flow Rate, m-dot: " + massFlowRate + "g/s \n" +
+        "Density, rho: " + density + "g/cm^3 \n" +
+        "Exit Velocity: " + exitVelocity + "m/s \n" +
+        "Exit Area: " + (exitArea*.0001) + "m^3\n" +
+        "Exit Pressure: " + exitPressure + "atm \n" +
+        "Atmospheric Pressure: " + atm + "atm \n" +
         "\nThrust: " + thrust);
     }
     
