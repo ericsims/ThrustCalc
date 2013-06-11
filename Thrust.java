@@ -61,31 +61,32 @@ public class Thrust
         }
         radius = .635;
         length = 14;
-        setVolume();
-        setDensity();
-        setCPressure();
-        setExitPressure();
+        setVolume(); // L
+        setDensity(); // kg/L
+        setCPressure(); // atm
+        setExitPressure(); // atm
         setExitVelocity();
         setMassFlowRate();
         setThrust();
         printAll();
     }
     
-    public void setVolume()
+    public void setVolume() // in: cm, cm, out: liters
     {
         // put your code here
         volume = Math.PI * Math.pow(radius, 2) * length;
+        volume *= .001; // cm^3 to liters
     }
-    public void setDensity()
+    public void setDensity() // in: g, L, out: g/cm^3
     {
         totalMass = 0;
         for(int i = 0; i < 5; i++)
         {
             totalMass += gramsOfGases[i];
         }
-        density = totalMass / volume; // g/cm^3
+        density = totalMass / (volume / .001); // g/cm^3
     }
-    public void setCPressure()
+    public void setCPressure() // out: atm
     {
         double[] pPressures = new double[5]; // partial pressures
         for(int i = 0; i < 5; i++)
@@ -99,40 +100,47 @@ public class Thrust
         }
         
     }
-        private double getPressure(double molmass, double totmass)
+        private double getPressure(double molmass, double totmass) // in: L, g/(g/mol) = mol, K out: atm
         {
             double n = totmass / molmass;
             double pressure = n * R * temp / volume;
             return pressure;
         }
-    public void setExitPressure()
+    public void setExitPressure() // in: kg/m^3, J/kg K, K out: atm note: g/cm^3 == kg/L
     {
         System.out.println("http://www.umutaksoy.com/tools/nozzle/pressureexit.php\nDensity: " + density + "Rspecific: " + rSpecific + "Temperature: " + temp);
         exitPressure = in.nextDouble();
     }
-    public void setExitVelocity()
+    public void setExitVelocity() // out: m/s
     {
         double exp = (gamma - 1)/gamma;
-        double rms = 0;
-        double total = 0;
+        /*double total = 0;
         for(int i = 0; i < 5; i++) // gets RMS of each gas.
         {
-            RMS[i] = RMS(molarMass[i]);
+            RMS[i] = RMS(molesOfGases[i]); //out: m/s
         }
         for(int i = 0; i < 5; i++)
         {
             total += molesOfGases[i]/totalMass * RMS[i];
         }
-        rms = total / 5; 
-        exitVelocity = rms * Math.sqrt((2 * gamma) / (gamma - 1)) * Math.sqrt(1 - Math.pow((exitPressure/cPressure), gamma));
+        rmsAVG = total / 5; */
+        exitVelocity = Math.sqrt( (temp * 8.314 / (25.3/1000)) * ((2 * gamma) / (gamma - 1)) * (1 - Math.pow( (exitPressure/cPressure), exp) ) );
+        System.out.println("exit^2: " + (temp * 8.314 / (25.3/1000)) * ((2 * gamma) / (gamma - 1)) * (1 - Math.pow( (exitPressure/cPressure), exp) ));
+        System.out.println("\t" + "Temp: " + temp);
+        System.out.println("\t" + "Gamma: " + gamma);
     }
-    public void setMassFlowRate()
+        public double RMS(double mol) // in: g/mol, out: m/s
+        {
+            double rms = Math.sqrt((3 * 8.31446 * temp )/ (mol*.001));
+            return rms;
+        }
+    public void setMassFlowRate() // in: kg/L, m/s, cm^2 out: kg/s
     {
-        massFlowRate = density * exitVelocity * exitArea;
+        massFlowRate = (density * (exitVelocity/100) * exitArea)/1000;
     }
-    public void setThrust()
+    public void setThrust() // kg/s * m/s + cm^2 * (atm) to Newtons
     {
-        thrust = massFlowRate * exitVelocity + exitArea * (exitPressure - atm);
+        thrust = massFlowRate * exitVelocity + (exitArea * .0001) * ((exitPressure - atm) * 1.01325 * Math.pow(10,5));
     }
     public void printAll()
     {
@@ -145,9 +153,5 @@ public class Thrust
         "Atmospheric Pressure: " + atm + "\n" +
         "\nThrust: " + thrust);
     }
-    public double RMS(double molMass)
-    {
-        double rms = Math.sqrt((3 * R * temp )/ molMass);
-        return rms;
-    }
+    
 }
