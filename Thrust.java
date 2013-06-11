@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 public class Thrust
 {
-    double R = .08206; // gas constant, atm
+    double R = .08206; // gas constant, L atm K-1 mol-1
     
     // Data associated with exhaust gases.
     // H20, N2, CO2, HCN, SO2
@@ -73,7 +73,6 @@ public class Thrust
     
     public void setVolume() // in: cm, cm, out: liters
     {
-        // put your code here
         volume = Math.PI * Math.pow(radius, 2) * length;
         volume *= .001; // cm^3 to liters
     }
@@ -91,25 +90,25 @@ public class Thrust
         double[] pPressures = new double[5]; // partial pressures
         for(int i = 0; i < 5; i++)
         {
-            getPressure(molesOfGases[i],gramsOfGases[i]);
+            pPressures[i] = getPressure(molesOfGases[i]);
         }
         cPressure = 0;
         for(int i = 0; i < 5; i++)
         {
             cPressure += pPressures[i];
         }
-        
+        System.out.println("cPressure: " + cPressure);
     }
-        private double getPressure(double molmass, double totmass) // in: L, g/(g/mol) = mol, K out: atm
+        private double getPressure(double n) // in: L, g/(g/mol) = mol, K out: atm
         {
-            double n = totmass / molmass;
-            double pressure = n * R * temp / volume;
+            double pressure = n * R * temp / volume; // gas constant, L atm K-1 mol-1
             return pressure;
         }
     public void setExitPressure() // in: kg/m^3, J/kg K, K out: atm note: g/cm^3 == kg/L
     {
         System.out.println("http://www.umutaksoy.com/tools/nozzle/pressureexit.php\nDensity: " + density + "Rspecific: " + rSpecific + "Temperature: " + temp);
-        exitPressure = in.nextDouble();
+        //exitPressure = in.nextDouble();
+        exitPressure = 1.7384548856672;
     }
     public void setExitVelocity() // out: m/s
     {
@@ -124,9 +123,10 @@ public class Thrust
             total += molesOfGases[i]/totalMass * RMS[i];
         }
         rmsAVG = total / 5; */
-        exitVelocity = Math.sqrt( (temp * 8.314 / (25.3/1000)) * ((2 * gamma) / (gamma - 1)) * (1 - Math.pow( (exitPressure/cPressure), exp) ) );
+        exitVelocity = Math.sqrt( (temp * 8.314 / (25.3*.001)) * ((2 * gamma) / (gamma - 1)) * (1 - Math.pow( (exitPressure/cPressure), exp) ) );
         System.out.println("exit^2: " + (temp * 8.314 / (25.3/1000)) * ((2 * gamma) / (gamma - 1)) * (1 - Math.pow( (exitPressure/cPressure), exp) ));
         System.out.println("\t" + "Temp: " + temp);
+        System.out.println("\t exp: " + exp);
         System.out.println("\t" + "Gamma: " + gamma);
     }
         public double RMS(double mol) // in: g/mol, out: m/s
